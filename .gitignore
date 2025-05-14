@@ -1,6 +1,9 @@
 # Compiled class file
 *.class
 
+#.env files
+*.env
+
 # Log file
 *.log
 
