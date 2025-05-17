@@ -1,0 +1,146 @@
+# Test Scenarios for Crypto Exchange Sprint 1
+
+## 1. Project Setup & Web3 Integration Tests
+
+### 1.1 Project Build Verification
+- **Test ID**: SETUP-001
+- **Description**: Verify project builds successfully
+- **Steps**:
+  1. Clone repository
+  2. Run build command (mvn clean install or gradle build)
+- **Expected Result**: Build completes without errors
+- **Acceptance Criteria**: Zero build failures
+
+### 1.2 Web3Service Connection Tests
+- **Test ID**: SETUP-002
+- **Description**: Verify Web3Service connects to Goerli testnet
+- **Steps**:
+  1. Start application
+  2. Check Web3Service initialization logs
+  3. Verify connection status
+- **Expected Result**: Successful connection to Goerli network
+- **Acceptance Criteria**: Connection established, no timeout errors
+
+### 1.3 Environment Configuration Tests
+- **Test ID**: SETUP-003
+- **Description**: Verify environment configuration
+- **Steps**:
+  1. Check .env file presence
+  2. Verify Infura API key configuration
+  3. Validate network configuration
+- **Expected Result**: All required configurations present and valid
+- **Acceptance Criteria**: No missing or invalid configurations
+
+## 2. Transfer Endpoint Tests
+
+### 2.1 Basic Transfer Request
+- **Test ID**: TRANSFER-001
+- **Description**: Verify basic transfer functionality
+- **Steps**:
+  1. Send POST request to /transfer
+  2. Include valid sender private key
+  3. Include valid recipient address
+  4. Include valid token amount
+- **Expected Result**: Returns mock transaction hash
+- **Acceptance Criteria**: Response contains valid txHash format
+
+### 2.2 Transfer Input Validation
+- **Test ID**: TRANSFER-002
+- **Description**: Verify input validation
+- **Steps**:
+  1. Test with invalid private key
+  2. Test with invalid recipient address
+  3. Test with negative amount
+  4. Test with zero amount
+- **Expected Result**: Appropriate error responses
+- **Acceptance Criteria**: Clear error messages for each invalid case
+
+### 2.3 Transfer Logging
+- **Test ID**: TRANSFER-003
+- **Description**: Verify request logging
+- **Steps**:
+  1. Send valid transfer request
+  2. Check application logs
+- **Expected Result**: Request details logged correctly
+- **Acceptance Criteria**: All input parameters logged
+
+## 3. Deposit Endpoint Tests
+
+### 3.1 Basic Deposit Request
+- **Test ID**: DEPOSIT-001
+- **Description**: Verify basic deposit functionality
+- **Steps**:
+  1. Send POST request to /deposit
+  2. Include valid wallet address
+  3. Include valid token
+  4. Include valid amount
+- **Expected Result**: Success confirmation message
+- **Acceptance Criteria**: Response indicates successful simulation
+
+### 3.2 Deposit Input Validation
+- **Test ID**: DEPOSIT-002
+- **Description**: Verify deposit input validation
+- **Steps**:
+  1. Test with invalid wallet address
+  2. Test with unsupported token
+  3. Test with invalid amount
+- **Expected Result**: Appropriate error responses
+- **Acceptance Criteria**: Clear error messages for invalid inputs
+
+### 3.3 Deposit Logging
+- **Test ID**: DEPOSIT-003
+- **Description**: Verify deposit request logging
+- **Steps**:
+  1. Send valid deposit request
+  2. Check application logs
+- **Expected Result**: Request details logged correctly
+- **Acceptance Criteria**: All input parameters logged
+
+## 4. Withdraw Endpoint Tests
+
+### 4.1 Basic Withdraw Request
+- **Test ID**: WITHDRAW-001
+- **Description**: Verify basic withdraw functionality
+- **Steps**:
+  1. Send POST request to /withdraw
+  2. Include valid wallet address
+  3. Include valid token
+  4. Include valid amount
+- **Expected Result**: Success confirmation message
+- **Acceptance Criteria**: Response indicates successful simulation
+
+### 4.2 Withdraw Input Validation
+- **Test ID**: WITHDRAW-002
+- **Description**: Verify withdraw input validation
+- **Steps**:
+  1. Test with invalid wallet address
+  2. Test with unsupported token
+  3. Test with invalid amount
+- **Expected Result**: Appropriate error responses
+- **Acceptance Criteria**: Clear error messages for invalid inputs
+
+### 4.3 Withdraw Logging
+- **Test ID**: WITHDRAW-003
+- **Description**: Verify withdraw request logging
+- **Steps**:
+  1. Send valid withdraw request
+  2. Check application logs
+- **Expected Result**: Request details logged correctly
+- **Acceptance Criteria**: All input parameters logged
+
+## Test Execution Guidelines
+
+1. Execute tests in order of dependencies
+2. Document any deviations from expected results
+3. Report any environment-specific issues
+4. Maintain test execution logs
+5. Update scenarios as implementation details change
+
+## Test Environment Requirements
+
+1. Java Development Kit (JDK) 11 or higher
+2. Maven or Gradle build tool
+3. Access to Goerli testnet
+4. Valid Infura API key
+5. Postman or similar API testing tool
+6. Log monitoring capability
