@@ -5,30 +5,21 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.5</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>3.2.3</version>
+		<relativePath/>
 	</parent>
-	<groupId>com.example</groupId>
+	<groupId>com.cryptoexchange</groupId>
 	<artifactId>crypto-exchange</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>crypto-exchange</name>
-	<description>Demo project for crypto exchange</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
+	<description>Crypto Exchange Application</description>
+	
 	<properties>
-		<java.version>21</java.version>
+		<java.version>17</java.version>
+		<web3j.version>4.9.8</web3j.version>
+		<mockito.version>5.10.0</mockito.version>
 	</properties>
+	
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -41,7 +32,12 @@
 			<scope>test</scope>
 		</dependency>
 
-		<!-- web3j Spring Boot Starter (for Ethereum integration) -->
+		<dependency>
+			<groupId>org.web3j</groupId>
+			<artifactId>core</artifactId>
+			<version>${web3j.version}</version>
+		</dependency>
+
 		<dependency>
 			<groupId>org.web3j</groupId>
 			<artifactId>web3j-spring-boot-starter</artifactId>
@@ -53,6 +49,26 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>2.0.12</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<version>${mockito.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-junit-jupiter</artifactId>
+			<version>${mockito.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -60,8 +76,15 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

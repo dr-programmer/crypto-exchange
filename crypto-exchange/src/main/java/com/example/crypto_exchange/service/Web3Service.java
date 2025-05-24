@@ -1,4 +1,4 @@
-package com.example.crypto_exchange;
+package com.example.crypto_exchange.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
