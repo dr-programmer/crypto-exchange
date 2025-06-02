@@ -1,5 +1,6 @@
-package com.example.crypto_exchange;
+package com.example.crypto_exchange.controller;
 
+import com.example.crypto_exchange.service.Web3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
