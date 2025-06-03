@@ -68,6 +68,14 @@ public class Token {
         this.decimals = decimals;
     }
 
+    public String getContractAddress() {
+        return contractAddress;
+    }
+
+    public void setContractAddress(String contractAddress) {
+        this.contractAddress = contractAddress;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -88,6 +96,7 @@ public class Token {
                 ", symbol='" + symbol + '\'' +
                 ", name='" + name + '\'' +
                 ", decimals=" + decimals +
+                ", contractAddress='" + contractAddress + '\'' +
                 '}';
     }
 } 

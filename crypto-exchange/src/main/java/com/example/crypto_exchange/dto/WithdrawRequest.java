@@ -3,18 +3,47 @@ package com.example.crypto_exchange.dto;
 import java.math.BigDecimal;
 
 public class WithdrawRequest {
+    private long userId;
+    private String tokenSymbol;
+    private BigDecimal amount;
+    private String toAddress;
 
-    private String walletAddress;   // the user’s address on L2 / EVM
-    private String token;           // e.g. “ETH”, “USDC”
-    private BigDecimal amount;      // human-readable units, not wei
+    public WithdrawRequest(Long userId, String tokenSymbol, BigDecimal amount, String toAddress) {
+        this.userId = userId;
+        this.tokenSymbol = tokenSymbol;
+        this.amount = amount;
+        this.toAddress = toAddress;
+    }
 
-    // ───────── getters / setters ─────────
-    public String getWalletAddress() { return walletAddress; }
-    public void setWalletAddress(String walletAddress) { this.walletAddress = walletAddress; }
+    public long getUserId() {
+        return userId;
+    }
 
-    public String getToken() { return token; }
-    public void setToken(String token) { this.token = token; }
+    public String getTokenSymbol() {
+        return tokenSymbol;
+    }
 
-    public BigDecimal getAmount() { return amount; }
-    public void setAmount(BigDecimal amount) { this.amount = amount; }
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public String getToAddress() {
+        return toAddress;
+    }
+
+    public void setToAddress(String toAddress) {
+        this.toAddress = toAddress;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public void setTokenSymbol(String tokenSymbol) {
+        this.tokenSymbol = tokenSymbol;
+    }
+
+    public void setUserId(long userId) {
+        this.userId = userId;
+    }
 }
