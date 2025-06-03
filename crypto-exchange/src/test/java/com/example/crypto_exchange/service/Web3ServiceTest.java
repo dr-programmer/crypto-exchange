@@ -23,7 +23,7 @@ class Web3ServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        web3Service = new Web3Service();
+        web3Service = new Web3Service(web3j);
     }
 
     @Test
