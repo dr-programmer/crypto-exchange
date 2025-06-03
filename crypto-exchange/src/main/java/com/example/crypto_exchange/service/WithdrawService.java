@@ -1,9 +1,29 @@
 package com.example.crypto_exchange.service;
 
 import com.example.crypto_exchange.dto.WithdrawRequest;
+import com.example.crypto_exchange.dto.WithdrawResponse;
+import com.example.crypto_exchange.entity.Token;
+import com.example.crypto_exchange.entity.UserBalance;
+import com.example.crypto_exchange.exception.WithdrawException;
+import com.example.crypto_exchange.repository.TokenRepository;
+import com.example.crypto_exchange.repository.UserBalanceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.web3j.crypto.Credentials;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.tx.Transfer;
+import org.web3j.utils.Convert;
+
+import java.math.BigDecimal;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 public class WithdrawService {
@@ -12,39 +32,93 @@ public class WithdrawService {
     
     private final TokenRepository tokenRepository;
     private final UserBalanceRepository userBalanceRepository;
+    private final Web3j web3j;
+
+    @Value("${exchange.wallet.private-key}")
+    private String exchangeWalletPrivateKey;
 
     @Autowired
-    public WithdrawService(TokenRepository tokenRepository, UserBalanceRepository userBalanceRepository) {
+    public WithdrawService(
+            TokenRepository tokenRepository, 
+            UserBalanceRepository userBalanceRepository,
+            Web3j web3j) {
         this.tokenRepository = tokenRepository;
         this.userBalanceRepository = userBalanceRepository;
+        this.web3j = web3j;
     }
 
-     /**
-     * Process a withdrawal request
+    /**
+     * Process a withdrawal request asynchronously
      * @param request The withdrawal request containing user, token, and amount details
-     * @return A status message indicating the result of the withdrawal
-     * @throws TokenNotFoundException if the requested token doesn't exist
-     * @throws InsufficientBalanceException if the user has insufficient balance
-     * @throws IllegalArgumentException if the withdrawal amount is invalid
+     * @return CompletableFuture<WithdrawResponse> containing transaction details and status
      */
-    public String processWithdraw(WithdrawRequest request) {
+    @Async
+    @Transactional
+    public CompletableFuture<WithdrawResponse> processWithdraw(WithdrawRequest request) {
+        return CompletableFuture.supplyAsync(() -> {
+            validateRequest(request);
+            log.info("Processing withdrawal request for user {} of {} {}", 
+                    request.getUserId(), request.getAmount(), request.getTokenSymbol());
+
+            Token token = tokenRepository.findBySymbol(request.getTokenSymbol())
+                .orElseThrow(() -> new WithdrawException("Token not found", "TOKEN_NOT_FOUND"));
+
+            UserBalance userBalance = userBalanceRepository.findByUserIdAndTokenId(request.getUserId(), token.getTokenId())
+                .orElseThrow(() -> new WithdrawException("User balance not found", "BALANCE_NOT_FOUND"));
+
+            if (!userBalance.hasSufficientBalance(request.getAmount())) {
+                throw new WithdrawException("Insufficient balance", "INSUFFICIENT_BALANCE");
+            }
+
+            try {
+                BigDecimal newAmount = userBalance.getAmount().subtract(request.getAmount());
+                userBalanceRepository.updateBalanceAmount(request.getUserId(), token.getTokenId(), newAmount);
+
+                String txHash = sendBlockchainTransaction(request.getToAddress(), request.getAmount());
+                String txId = String.format("WD_%d_%s", request.getUserId(), System.currentTimeMillis());
+                
+                log.info("Withdrawal processed successfully. Transaction hash: {}", txHash);
+                return new WithdrawResponse(txId, txHash, "SUCCESS");
+
+            } catch (Exception e) {
+                log.error("Error processing withdrawal: {}", e.getMessage());
+                throw new WithdrawException("Failed to process withdrawal: " + e.getMessage(), "BLOCKCHAIN_ERROR");
+            }
+        });
+    }
+
+    private void validateRequest(WithdrawRequest request) {
+        if (request == null) {
+            throw new WithdrawException("Request cannot be null", "INVALID_REQUEST");
+        }
         if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Withdrawal amount must be positive");
+            throw new WithdrawException("Withdrawal amount must be positive", "INVALID_AMOUNT");
         }
+        if (request.getToAddress() == null || !request.getToAddress().matches("^0x[a-fA-F0-9]{40}$")) {
+            throw new WithdrawException("Invalid Ethereum address format", "INVALID_ADDRESS");
+        }
+        if (request.getTokenSymbol() == null || request.getTokenSymbol().trim().isEmpty()) {
+            throw new WithdrawException("Token symbol cannot be empty", "INVALID_TOKEN");
+        }
+    }
+
+    @Retryable(
+        value = { Exception.class },
+        maxAttempts = 3,
+        backoff = @Backoff(delay = 1000, multiplier = 2)
+    )
+    private String sendBlockchainTransaction(String toAddress, BigDecimal amount) throws Exception {
+        Credentials credentials = Credentials.create(exchangeWalletPrivateKey);
+        TransactionReceipt receipt = Transfer.sendFunds(
+            web3j, 
+            credentials,
+            toAddress,
+            amount,
+            Convert.Unit.ETHER
+        ).send();
         
-       Token token = tokenRepository.findBySymbol(request.getTokenSymbol())
-            .orElseThrow(() -> new TokenNotFoundException(request.getTokenSymbol()));
-
-        UserBalance userBalance = userBalanceRepository.findByUserIdAndTokenId(request.getUserId(), token.getTokenId())
-            .orElseThrow(() -> new UserBalanceNotFoundException(request.getUserId(), token.getTokenId()));
-
-        if (!userBalance.hasSufficientBalance(request.getAmount())) {
-            throw new InsufficientBalanceException(userBalance.getAmount(), request.getAmount());
-        }
-
-        BigDecimal newAmount = userBalance.getAmount().subtract(request.getAmount());
-        userBalanceRepository.updateBalanceAmount(request.getUserId(), token.getTokenId(), newAmount);
-
-        return "Withdrawal processed successfully";
+        return receipt.getTransactionHash();
     }
 }
+
+            throw new WithdrawException("Token symbol cannot be empty", "INVALID_TOKEN");
