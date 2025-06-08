@@ -1,6 +1,5 @@
 package com.example.crypto_exchange.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.EthBlockNumber;
@@ -11,8 +10,11 @@ import java.math.BigInteger;
 @Service
 public class Web3Service {
 
-    @Autowired
-    private Web3j web3j;
+    private final Web3j web3j;
+
+    public Web3Service(Web3j web3j) {
+        this.web3j = web3j;
+    }
 
     public BigInteger getBlockNumber() throws IOException {
         EthBlockNumber blockNumberResponse = web3j.ethBlockNumber().send();

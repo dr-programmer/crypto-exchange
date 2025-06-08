@@ -47,11 +47,6 @@ public class WithdrawService {
         this.web3j = web3j;
     }
 
-    /**
-     * Process a withdrawal request asynchronously
-     * @param request The withdrawal request containing user, token, and amount details
-     * @return CompletableFuture<WithdrawResponse> containing transaction details and status
-     */
     @Async
     @Transactional
     public CompletableFuture<WithdrawResponse> processWithdraw(WithdrawRequest request) {
@@ -76,12 +71,12 @@ public class WithdrawService {
 
                 String txHash = sendBlockchainTransaction(request.getToAddress(), request.getAmount());
                 String txId = String.format("WD_%d_%s", request.getUserId(), System.currentTimeMillis());
-                
+
                 log.info("Withdrawal processed successfully. Transaction hash: {}", txHash);
                 return new WithdrawResponse(txId, txHash, "SUCCESS");
 
             } catch (Exception e) {
-                log.error("Error processing withdrawal: {}", e.getMessage());
+                log.error("Error processing withdrawal: {}", e.getMessage(), e);
                 throw new WithdrawException("Failed to process withdrawal: " + e.getMessage(), "BLOCKCHAIN_ERROR");
             }
         });
@@ -91,14 +86,15 @@ public class WithdrawService {
         if (request == null) {
             throw new WithdrawException("Request cannot be null", "INVALID_REQUEST");
         }
-        if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new WithdrawException("Withdrawal amount must be positive", "INVALID_AMOUNT");
-        }
-        if (request.getToAddress() == null || !request.getToAddress().matches("^0x[a-fA-F0-9]{40}$")) {
+        if (request.getToAddress() == null || request.getToAddress().isEmpty() || !request.getToAddress().matches("^0x[a-fA-F0-9]{40}$")) {
             throw new WithdrawException("Invalid Ethereum address format", "INVALID_ADDRESS");
         }
-        if (request.getTokenSymbol() == null || request.getTokenSymbol().trim().isEmpty()) {
-            throw new WithdrawException("Token symbol cannot be empty", "INVALID_TOKEN");
+        if (request.getTokenSymbol() == null || request.getTokenSymbol().trim().isEmpty() ||
+            !(request.getTokenSymbol().equals("ETH") || request.getTokenSymbol().equals("USDC"))) {
+            throw new WithdrawException("Unsupported or empty token symbol", "INVALID_TOKEN");
+        }
+        if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new WithdrawException("Withdrawal amount must be positive", "INVALID_AMOUNT");
         }
     }
 
@@ -120,5 +116,3 @@ public class WithdrawService {
         return receipt.getTransactionHash();
     }
 }
-
-            throw new WithdrawException("Token symbol cannot be empty", "INVALID_TOKEN");
