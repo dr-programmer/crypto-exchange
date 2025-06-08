@@ -1,34 +1,61 @@
 package com.example.crypto_exchange.service;
 
 import com.example.crypto_exchange.dto.DepositRequest;
+import com.example.crypto_exchange.entity.WalletBalance;
+import com.example.crypto_exchange.repository.WalletBalanceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.UUID;
 
 @Service
 public class DepositService {
     private static final Logger log = LoggerFactory.getLogger(DepositService.class);
 
-    /**
-     * Simulate a deposit and return a human-friendly status message.
-     * In a later sprint you'll swap the body for a real web3j call.
-     */
+    @Autowired
+    private BlockchainService blockchainService;
+
+    @Autowired
+    private WalletBalanceRepository walletBalanceRepository;
+
+    @Transactional
     public String processDeposit(DepositRequest request) {
-        // Input validation
-        if (request == null) {
-            throw new com.example.crypto_exchange.exception.InvalidInputException("Request cannot be null");
+        // Generate a unique transaction ID
+        String txId = UUID.randomUUID().toString();
+        
+        try {
+            // Get the token balance from blockchain
+            BigDecimal blockchainBalance = blockchainService.getTokenBalance(
+                request.getTokenContractAddress(),
+                request.getWalletAddress()
+            );
+
+            // Get or create wallet balance record
+            WalletBalance walletBalance = walletBalanceRepository
+                .findByWalletAddressAndTokenContractAddress(
+                    request.getWalletAddress(),
+                    request.getTokenContractAddress()
+                )
+                .orElse(new WalletBalance());
+
+            // Update wallet balance
+            walletBalance.setWalletAddress(request.getWalletAddress());
+            walletBalance.setTokenContractAddress(request.getTokenContractAddress());
+            walletBalance.setBalance(blockchainBalance);
+            walletBalanceRepository.save(walletBalance);
+
+            // Log the deposit
+            log.info("Deposit processed - txId: {}, wallet: {}, token: {}, balance: {}",
+                    txId, request.getWalletAddress(), request.getTokenContractAddress(), blockchainBalance);
+
+            return txId;
+        } catch (Exception e) {
+            log.error("Error processing deposit for wallet {}: {}", request.getWalletAddress(), e.getMessage());
+            throw new RuntimeException("Failed to process deposit", e);
         }
-        if (request.getWalletAddress() == null || request.getWalletAddress().isEmpty() || !request.getWalletAddress().matches("^0x[a-fA-F0-9]{40}$")) {
-            throw new com.example.crypto_exchange.exception.InvalidInputException("Invalid wallet address");
-        }
-        if (request.getToken() == null || request.getToken().isEmpty() || !(request.getToken().equals("ETH") || request.getToken().equals("USDC"))) {
-            throw new com.example.crypto_exchange.exception.InvalidInputException("Unsupported or empty token");
-        }
-        if (request.getAmount() == null || request.getAmount().compareTo(java.math.BigDecimal.ZERO) <= 0) {
-            throw new com.example.crypto_exchange.exception.InvalidInputException("Amount must be positive");
-        }
-        log.info("Simulating deposit -> wallet: {}, token: {}, amount: {}",
-                request.getWalletAddress(), request.getToken(), request.getAmount());
-        return "Deposit simulated successfully";
     }
 } 
