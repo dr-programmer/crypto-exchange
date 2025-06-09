@@ -10,6 +10,14 @@ import org.web3j.tx.Contract;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
+import org.web3j.abi.FunctionEncoder;
+import org.web3j.abi.FunctionReturnDecoder;
+import org.web3j.abi.TypeReference;
+import org.web3j.abi.datatypes.Address;
+import org.web3j.abi.datatypes.Function;
+import org.web3j.abi.datatypes.Type;
+import org.web3j.abi.datatypes.generated.Uint256;
+import org.web3j.protocol.core.methods.request.Transaction;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -49,23 +57,23 @@ public class BlockchainService {
      */
     public BigDecimal getTokenBalance(String tokenAddress, String walletAddress, int decimals) {
         try {
-            // Load the ERC-20 contract
-            Contract contract = Contract.load(
-                "0x" + tokenAddress,
-                web3j,
-                null,
-                null
+            Function function = new Function(
+                "balanceOf",
+                java.util.Collections.singletonList(new Address(walletAddress)),
+                java.util.Collections.singletonList(new TypeReference<Uint256>() {})
             );
 
-            // Call balanceOf function
-            BigInteger balance = (BigInteger) contract.call(
-                "balanceOf",
-                walletAddress
-            ).get(0);
+            String encodedFunction = FunctionEncoder.encode(function);
 
-            // Convert to decimal with proper decimals
-            return new BigDecimal(balance)
-                .divide(BigDecimal.valueOf(Math.pow(10, decimals)));
+            org.web3j.protocol.core.methods.response.EthCall response = web3j.ethCall(
+                Transaction.createEthCallTransaction(walletAddress, tokenAddress, encodedFunction),
+                DefaultBlockParameterName.LATEST
+            ).send();
+
+            java.util.List<Type> output = FunctionReturnDecoder.decode(response.getValue(), function.getOutputParameters());
+            BigInteger balance = (output.isEmpty()) ? BigInteger.ZERO : (BigInteger) output.get(0).getValue();
+
+            return new BigDecimal(balance).divide(BigDecimal.TEN.pow(decimals));
         } catch (Exception e) {
             throw new RuntimeException("Failed to get token balance for address: " + walletAddress, e);
         }

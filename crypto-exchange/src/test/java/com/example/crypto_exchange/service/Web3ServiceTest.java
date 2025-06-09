@@ -28,8 +28,19 @@ class Web3ServiceTest {
 
     @Test
     void testGetBlockNumber() throws IOException {
-        // This test is a placeholder since the real method requires a running node.
-        // You can expand this test if you add logic to Web3Service that can be mocked.
-        assertDoesNotThrow(() -> web3Service.getBlockNumber());
+        // Arrange
+        EthBlockNumber ethBlockNumber = mock(EthBlockNumber.class);
+        when(ethBlockNumber.getBlockNumber()).thenReturn(BigInteger.valueOf(12345));
+        org.web3j.protocol.core.Request request = mock(org.web3j.protocol.core.Request.class);
+        when(web3j.ethBlockNumber()).thenReturn(request);
+        when(request.send()).thenReturn(ethBlockNumber);
+
+        // Act
+        BigInteger blockNumber = web3Service.getBlockNumber();
+
+        // Assert
+        assertNotNull(blockNumber);
+        assertEquals(BigInteger.valueOf(12345), blockNumber);
+        verify(web3j).ethBlockNumber();
     }
 } 
