@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:14-alpine
+    container_name: crypto_exchange_postgres
+    environment:
+      POSTGRES_DB: CryptoEXchangeDB
+      POSTGRES_USER: nikgeo
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+volumes:
+  pgdata: 

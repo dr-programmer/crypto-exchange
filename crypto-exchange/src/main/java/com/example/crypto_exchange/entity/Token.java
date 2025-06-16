@@ -26,6 +26,9 @@ public class Token {
     @Column(name = "decimals", nullable = false)
     private Integer decimals;
 
+    @Column(name = "contract_address", length = 100)
+    private String contractAddress;
+
     // Constructors
     public Token() {}
 
