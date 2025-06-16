@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -39,7 +40,8 @@ public interface UserBalanceRepository extends JpaRepository<UserBalance, UserBa
     /**
      * Update balance amount for a specific user-token combination
      */
-    @Modifying
+    @Transactional
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE UserBalance ub SET ub.amount = :amount, ub.updatedAt = CURRENT_TIMESTAMP " +
            "WHERE ub.userId = :userId AND ub.tokenId = :tokenId")
     int updateBalanceAmount(@Param("userId") Long userId, 
