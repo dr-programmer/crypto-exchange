@@ -21,6 +21,13 @@ public class WalletBalance {
     @Column(nullable = false)
     private BigDecimal balance;
 
+    /**
+     * Internal user that owns this wallet address. This allows the deposit watcher
+     * to credit the correct account when on-chain funds arrive.
+     */
+    @Column(name = "user_id")
+    private Long userId;
+
     // Getters and Setters
     public Long getId() {
         return id;
@@ -52,5 +59,13 @@ public class WalletBalance {
 
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 } 
