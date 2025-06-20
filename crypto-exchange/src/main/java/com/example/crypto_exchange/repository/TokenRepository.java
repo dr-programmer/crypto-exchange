@@ -18,4 +18,9 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
      * Check if token exists by symbol
      */
     boolean existsBySymbol(String symbol);
+
+    /**
+     * Find token by its smart-contract address
+     */
+    Optional<Token> findByContractAddress(String contractAddress);
 } 
