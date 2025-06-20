@@ -1,8 +1,8 @@
 package com.example.crypto_exchange.service;
 
 import com.example.crypto_exchange.dto.DepositRequest;
-import com.example.crypto_exchange.entity.WalletBalance;
-import com.example.crypto_exchange.repository.WalletBalanceRepository;
+import com.example.crypto_exchange.entity.Token;
+import com.example.crypto_exchange.repository.TokenRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,52 +10,49 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Service
 public class DepositService {
     private static final Logger log = LoggerFactory.getLogger(DepositService.class);
 
     @Autowired
-    private BlockchainService blockchainService;
+    private TokenRepository tokenRepository;
 
     @Autowired
-    private WalletBalanceRepository walletBalanceRepository;
+    private UserBalanceService userBalanceService;
 
+    /**
+     * Process a deposit and add funds to user's balance
+     */
     @Transactional
     public String processDeposit(DepositRequest request) {
-        // Generate a unique transaction ID
-        String txId = UUID.randomUUID().toString();
-        
-        try {
-            // Get the token balance from blockchain
-            BigDecimal blockchainBalance = blockchainService.getTokenBalance(
-                request.getTokenContractAddress(),
-                request.getWalletAddress()
-            );
+        log.info("Processing deposit request: userId={}, tokenSymbol={}, amount={}, walletAddress={}", 
+                request.getUserId(), request.getTokenSymbol(), request.getAmount(), request.getWalletAddress());
 
-            // Get or create wallet balance record
-            WalletBalance walletBalance = walletBalanceRepository
-                .findByWalletAddressAndTokenContractAddress(
-                    request.getWalletAddress(),
-                    request.getTokenContractAddress()
-                )
-                .orElse(new WalletBalance());
-
-            // Update wallet balance
-            walletBalance.setWalletAddress(request.getWalletAddress());
-            walletBalance.setTokenContractAddress(request.getTokenContractAddress());
-            walletBalance.setBalance(blockchainBalance);
-            walletBalanceRepository.save(walletBalance);
-
-            // Log the deposit
-            log.info("Deposit processed - txId: {}, wallet: {}, token: {}, balance: {}",
-                    txId, request.getWalletAddress(), request.getTokenContractAddress(), blockchainBalance);
-
-            return txId;
-        } catch (Exception e) {
-            log.error("Error processing deposit for wallet {}: {}", request.getWalletAddress(), e.getMessage());
-            throw new RuntimeException("Failed to process deposit", e);
+        // Input validation
+        if (request == null) {
+            throw new IllegalArgumentException("Request cannot be null");
         }
+        if (request.getWalletAddress() == null || request.getWalletAddress().isEmpty() || !request.getWalletAddress().matches("^0x[a-fA-F0-9]{40}$")) {
+            throw new IllegalArgumentException("Invalid wallet address");
+        }
+        if (request.getTokenSymbol() == null || request.getTokenSymbol().isEmpty()) {
+            throw new IllegalArgumentException("Token symbol cannot be empty");
+        }
+        if (request.getAmount() == null || request.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new IllegalArgumentException("Amount must be positive");
+        }
+
+        // Validate token exists
+        Token token = tokenRepository.findBySymbol(request.getTokenSymbol())
+            .orElseThrow(() -> new IllegalArgumentException("Token not found: " + request.getTokenSymbol()));
+
+        // Add to user's balance
+        userBalanceService.addToBalance(request.getUserId(), request.getTokenSymbol(), request.getAmount());
+
+        log.info("Deposit processed successfully for user {}: {} {}", 
+                request.getUserId(), request.getAmount(), request.getTokenSymbol());
+
+        return String.format("Deposit of %s %s processed successfully", request.getAmount(), request.getTokenSymbol());
     }
 } 

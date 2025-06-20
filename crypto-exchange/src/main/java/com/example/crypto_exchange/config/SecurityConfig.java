@@ -37,12 +37,12 @@ public class SecurityConfig {
     @Bean
     public UserDetailsService userDetailsService() {
         log.info("Configuring in-memory user details service");
-        String password = "2b50f17f-a9b9-4587-8c40-1d04e8d5712b";
+        String password = "password";
         String encodedPassword = passwordEncoder().encode(password);
         log.debug("Encoded password: {}", encodedPassword);
 
         UserDetails user = User.builder()
-            .username("Test User")
+            .username("nikgeo")
             .password(encodedPassword)
             .roles("USER")
             .build();

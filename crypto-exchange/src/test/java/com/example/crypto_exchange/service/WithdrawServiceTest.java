@@ -15,7 +15,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.http.ResponseEntity;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
 import org.web3j.tx.Transfer;
@@ -28,8 +27,6 @@ import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -58,8 +55,8 @@ class WithdrawServiceTest {
         web3j = Mockito.mock(Web3j.class);
         credentialsFactory = Mockito.mock(CredentialsFactory.class);
         
-        // Create a test instance of WithdrawService with reflection to set the private key
-        withdrawService = new WithdrawService(tokenRepository, userBalanceRepository, web3j, credentialsFactory, Runnable::run);
+        // Create a test instance of WithdrawService with the correct constructor
+        withdrawService = new WithdrawService(tokenRepository, userBalanceRepository, web3j, credentialsFactory);
         ReflectionTestUtils.setField(withdrawService, "exchangeWalletPrivateKey", TEST_PRIVATE_KEY);
         
         // Mock credentials factory to accept any string and return a properly mocked Credentials
@@ -95,8 +92,8 @@ class WithdrawServiceTest {
         when(userBalanceRepository.updateBalanceAmount(any(), any(), any())).thenReturn(1);
 
         // Act
-        ResponseEntity<WithdrawResponse> responseEntity = withdrawService.processWithdraw(request).get();
-        WithdrawResponse response = responseEntity.getBody();
+        CompletableFuture<WithdrawResponse> future = withdrawService.processWithdraw(request);
+        WithdrawResponse response = future.get();
 
         // Assert
         assertNotNull(response);
