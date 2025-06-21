@@ -9,9 +9,8 @@ import io.github.bucket4j.Bucket;
 import io.github.bucket4j.Bucket4j;
 import io.github.bucket4j.Refill;
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,16 +21,15 @@ import java.util.Map;
 import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/withdraw")
+@RequiredArgsConstructor
 public class WithdrawController {
     
-    private static final Logger log = LoggerFactory.getLogger(WithdrawController.class);
-
     private final WithdrawService withdrawService;
     private final Bucket rateLimitBucket;
 
-    @Autowired
     public WithdrawController(WithdrawService withdrawService) {
         this.withdrawService = withdrawService;
         

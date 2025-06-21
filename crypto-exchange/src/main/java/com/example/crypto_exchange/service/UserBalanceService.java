@@ -7,9 +7,8 @@ import com.example.crypto_exchange.entity.UserBalanceId;
 import com.example.crypto_exchange.repository.TokenRepository;
 import com.example.crypto_exchange.repository.UserBalanceRepository;
 import com.example.crypto_exchange.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,20 +16,15 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class UserBalanceService {
 
-    private static final Logger log = LoggerFactory.getLogger(UserBalanceService.class);
-
-    @Autowired
-    private UserBalanceRepository userBalanceRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private TokenRepository tokenRepository;
+    private final UserBalanceRepository userBalanceRepository;
+    private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
 
     /**
      * Get balance for a specific user and token.

@@ -3,9 +3,8 @@ package com.example.crypto_exchange.controller;
 import com.example.crypto_exchange.dto.TransferRequest;
 import com.example.crypto_exchange.service.TransferService;
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,14 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/transfer")
+@RequiredArgsConstructor
 public class TransferController {
 
-    private static final Logger log = LoggerFactory.getLogger(TransferController.class);
-
-    @Autowired
-    private TransferService transferService;
+    private final TransferService transferService;
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
