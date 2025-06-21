@@ -7,11 +7,9 @@ import com.example.crypto_exchange.entity.UserBalance;
 import com.example.crypto_exchange.exception.WithdrawException;
 import com.example.crypto_exchange.repository.TokenRepository;
 import com.example.crypto_exchange.repository.UserBalanceRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.scheduling.annotation.Async;
@@ -30,31 +28,19 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class WithdrawService {
-
-    private static final Logger log = LoggerFactory.getLogger(WithdrawService.class);
     
     private final TokenRepository tokenRepository;
     private final UserBalanceRepository userBalanceRepository;
     private final Web3j web3j;
     private final CredentialsFactory credentialsFactory;
-    private final Executor executor;
+    private final Executor executor = ForkJoinPool.commonPool();
 
     @Value("${exchange.wallet.private-key:dummy_private_key}")
     private String exchangeWalletPrivateKey;
-
-    @Autowired
-    public WithdrawService(TokenRepository tokenRepository, 
-                          UserBalanceRepository userBalanceRepository, 
-                          Web3j web3j, 
-                          CredentialsFactory credentialsFactory) {
-        this.tokenRepository = tokenRepository;
-        this.userBalanceRepository = userBalanceRepository;
-        this.web3j = web3j;
-        this.credentialsFactory = credentialsFactory;
-        this.executor = ForkJoinPool.commonPool();
-    }
 
     @Async
     @Transactional

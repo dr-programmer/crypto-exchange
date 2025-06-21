@@ -1,23 +1,20 @@
 package com.example.crypto_exchange.controller;
 
 import com.example.crypto_exchange.service.Web3Service;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.math.BigInteger;
 
+@Slf4j
 @RestController
+@RequiredArgsConstructor
 public class EthController {
 
-    private static final Logger log = LoggerFactory.getLogger(EthController.class);
-
-    @Autowired
-    private Web3Service web3Service;
+    private final Web3Service web3Service;
 
     @GetMapping("/block")
     public ResponseEntity<BigInteger> getBlockNumber() {

@@ -3,9 +3,8 @@ package com.example.crypto_exchange.controller;
 import com.example.crypto_exchange.dto.DepositRequest;
 import com.example.crypto_exchange.service.DepositService;
 import jakarta.validation.Valid;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -13,14 +12,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/deposit")
+@RequiredArgsConstructor
 public class DepositController {
 
-    private static final Logger log = LoggerFactory.getLogger(DepositController.class);
-
-    @Autowired
-    private DepositService depositService;
+    private final DepositService depositService;
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")

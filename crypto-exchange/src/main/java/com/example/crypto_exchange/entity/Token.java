@@ -3,10 +3,17 @@ package com.example.crypto_exchange.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import java.util.Objects;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 @Entity
 @Table(name = "tokens")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(chain = true)
 public class Token {
 
     @Id
@@ -29,77 +36,10 @@ public class Token {
     @Column(name = "contract_address", length = 100)
     private String contractAddress;
 
-    // Constructors
-    public Token() {}
-
+    // Custom constructor
     public Token(String symbol, String name, Integer decimals) {
         this.symbol = symbol;
         this.name = name;
         this.decimals = decimals;
-    }
-
-    // Getters and Setters
-    public Long getTokenId() {
-        return tokenId;
-    }
-
-    public void setTokenId(Long tokenId) {
-        this.tokenId = tokenId;
-    }
-
-    public String getSymbol() {
-        return symbol;
-    }
-
-    public void setSymbol(String symbol) {
-        this.symbol = symbol;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Integer getDecimals() {
-        return decimals;
-    }
-
-    public void setDecimals(Integer decimals) {
-        this.decimals = decimals;
-    }
-
-    public String getContractAddress() {
-        return contractAddress;
-    }
-
-    public void setContractAddress(String contractAddress) {
-        this.contractAddress = contractAddress;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Token token = (Token) o;
-        return Objects.equals(tokenId, token.tokenId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(tokenId);
-    }
-
-    @Override
-    public String toString() {
-        return "Token{" +
-                "tokenId=" + tokenId +
-                ", symbol='" + symbol + '\'' +
-                ", name='" + name + '\'' +
-                ", decimals=" + decimals +
-                ", contractAddress='" + contractAddress + '\'' +
-                '}';
     }
 } 

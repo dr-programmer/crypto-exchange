@@ -1,8 +1,7 @@
 package com.example.crypto_exchange.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,14 +14,13 @@ import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/ethereum")
+@RequiredArgsConstructor
 public class EthereumController {
 
-    private static final Logger log = LoggerFactory.getLogger(EthereumController.class);
-
-    @Autowired
-    private Web3j web3j;
+    private final Web3j web3j;
 
     @GetMapping("/block-number")
     @PreAuthorize("hasRole('USER')")

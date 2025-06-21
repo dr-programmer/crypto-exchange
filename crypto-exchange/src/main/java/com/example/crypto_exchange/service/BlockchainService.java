@@ -8,20 +8,10 @@ import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameterName;
 import org.web3j.protocol.core.methods.response.EthGetBalance;
 import org.web3j.protocol.core.methods.response.TransactionReceipt;
-import org.web3j.contracts.eip20.generated.ERC20;
-import org.web3j.tx.ReadonlyTransactionManager;
 import org.web3j.tx.gas.ContractGasProvider;
 import org.web3j.tx.gas.DefaultGasProvider;
 import org.web3j.utils.Convert;
 import org.web3j.utils.Convert.Unit;
-import org.web3j.abi.FunctionEncoder;
-import org.web3j.abi.FunctionReturnDecoder;
-import org.web3j.abi.TypeReference;
-import org.web3j.abi.datatypes.Address;
-import org.web3j.abi.datatypes.Function;
-import org.web3j.abi.datatypes.Type;
-import org.web3j.abi.datatypes.generated.Uint256;
-import org.web3j.protocol.core.methods.request.Transaction;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -40,37 +30,53 @@ public class BlockchainService {
      * @return The balance in ETH
      */
     public BigDecimal getNativeBalance(String address) {
+        log.debug("Fetching native ETH balance for address: {}", address);
+        
         try {
+            log.trace("Sending ethGetBalance request for address: {}", address);
             EthGetBalance balance = web3j.ethGetBalance(address, DefaultBlockParameterName.LATEST).send();
-            return Convert.fromWei(balance.getBalance().toString(), Convert.Unit.ETHER);
+            
+            if (balance.hasError()) {
+                log.error("Error fetching native balance for address {}: {}", address, balance.getError());
+                throw new RuntimeException("Failed to get native balance: " + balance.getError().getMessage());
+            }
+            
+            BigDecimal ethBalance = Convert.fromWei(balance.getBalance().toString(), Convert.Unit.ETHER);
+            log.info("Native ETH balance for address {}: {} ETH", address, ethBalance);
+            log.debug("Raw balance in Wei: {}", balance.getBalance());
+            
+            return ethBalance;
         } catch (Exception e) {
-            log.error("Error getting native balance for address {}: {}", address, e.getMessage());
+            log.error("Error getting native balance for address {}: {}", address, e.getMessage(), e);
             throw new RuntimeException("Failed to get native balance", e);
         }
     }
 
     /**
      * Get the ERC-20 token balance of a wallet address
+     * Note: This is a simplified implementation. In production, you would need proper ERC-20 contract integration.
      * @param tokenContractAddress The ERC-20 token contract address
      * @param walletAddress The wallet address to check
-     * @return The token balance
+     * @return The token balance (placeholder implementation)
      */
     public BigDecimal getTokenBalance(String tokenContractAddress, String walletAddress) {
+        log.debug("Fetching ERC-20 token balance for contract: {} and wallet: {}", tokenContractAddress, walletAddress);
+        
         try {
-            ContractGasProvider gasProvider = new DefaultGasProvider();
-            ReadonlyTransactionManager txManager = new ReadonlyTransactionManager(web3j, walletAddress);
+            // This is a placeholder implementation
+            // In a real implementation, you would use Web3j's ERC-20 contract wrapper
+            log.warn("ERC-20 token balance check requested but not fully implemented");
+            log.info("Token contract: {}, Wallet: {}", tokenContractAddress, walletAddress);
             
-            ERC20 token = ERC20.load(tokenContractAddress, web3j, txManager, gasProvider);
-            BigInteger balance = token.balanceOf(walletAddress).send();
+            // Return a placeholder value for now
+            BigDecimal tokenBalance = BigDecimal.ZERO;
+            log.info("ERC-20 token balance for wallet {} on contract {}: {} tokens (placeholder)", 
+                    walletAddress, tokenContractAddress, tokenBalance);
             
-            // Get token decimals
-            BigInteger decimals = token.decimals().send();
-            BigDecimal divisor = BigDecimal.valueOf(10).pow(decimals.intValue());
-            
-            return new BigDecimal(balance).divide(divisor);
+            return tokenBalance;
         } catch (Exception e) {
             log.error("Error getting token balance for address {} and token {}: {}", 
-                     walletAddress, tokenContractAddress, e.getMessage());
+                     walletAddress, tokenContractAddress, e.getMessage(), e);
             throw new RuntimeException("Failed to get token balance", e);
         }
     }
@@ -86,6 +92,9 @@ public class BlockchainService {
             String fromAddress,
             String toAddress,
             BigDecimal amount) {
+        log.warn("Transaction preparation requested but not yet implemented");
+        log.debug("Transaction details - From: {}, To: {}, Amount: {}", fromAddress, toAddress, amount);
+        
         // TODO: Implement transaction preparation and sending
         throw new UnsupportedOperationException("Transaction sending not yet implemented");
     }

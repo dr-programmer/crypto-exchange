@@ -2,13 +2,19 @@ package com.example.crypto_exchange.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
 @Table(name = "balances")
 @IdClass(UserBalanceId.class)
+@Data
+@NoArgsConstructor
+@Accessors(chain = true)
 public class UserBalance {
 
     @Id
@@ -34,9 +40,7 @@ public class UserBalance {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // Constructors
-    public UserBalance() {}
-
+    // Custom constructors
     public UserBalance(Long userId, Long tokenId, BigDecimal amount) {
         this.userId = userId;
         this.tokenId = tokenId;
@@ -53,36 +57,12 @@ public class UserBalance {
         this.updatedAt = LocalDateTime.now();
     }
 
-    // Getters and Setters
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public Long getTokenId() {
-        return tokenId;
-    }
-
-    public void setTokenId(Long tokenId) {
-        this.tokenId = tokenId;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
+    // Custom setters for JPA relationships
     public void setUser(User user) {
         this.user = user;
         if (user != null) {
             this.userId = user.getUserId();
         }
-    }
-
-    public Token getToken() {
-        return token;
     }
 
     public void setToken(Token token) {
@@ -92,21 +72,9 @@ public class UserBalance {
         }
     }
 
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
     public void setAmount(BigDecimal amount) {
         this.amount = amount != null ? amount : BigDecimal.ZERO;
         this.updatedAt = LocalDateTime.now();
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     // Business methods for balance operations
@@ -136,29 +104,5 @@ public class UserBalance {
         if (this.amount == null) {
             this.amount = BigDecimal.ZERO;
         }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        UserBalance that = (UserBalance) o;
-        return Objects.equals(userId, that.userId) && 
-               Objects.equals(tokenId, that.tokenId);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(userId, tokenId);
-    }
-
-    @Override
-    public String toString() {
-        return "UserBalance{" +
-                "userId=" + userId +
-                ", tokenId=" + tokenId +
-                ", amount=" + amount +
-                ", updatedAt=" + updatedAt +
-                '}';
     }
 } 
