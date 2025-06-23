@@ -28,14 +28,9 @@ import java.util.concurrent.CompletableFuture;
 public class WithdrawController {
     
     private final WithdrawService withdrawService;
-    private final Bucket rateLimitBucket;
-
-    public WithdrawController(WithdrawService withdrawService) {
-        this.withdrawService = withdrawService;
-        
-        Bandwidth limit = Bandwidth.classic(10, Refill.greedy(10, Duration.ofMinutes(1)));
-        this.rateLimitBucket = Bucket4j.builder().addLimit(limit).build();
-    }
+    private final Bucket rateLimitBucket = Bucket4j.builder()
+        .addLimit(Bandwidth.classic(10, Refill.greedy(10, Duration.ofMinutes(1))))
+        .build();
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
